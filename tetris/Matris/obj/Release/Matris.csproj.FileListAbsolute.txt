@@ -1,0 +1,12 @@
+C:\Users\casper\source\repos\tetris\Matris\bin\Release\Matris.dll
+C:\Users\casper\source\repos\tetris\Matris\bin\Release\Matris.pdb
+C:\Users\casper\source\repos\tetris\Matris\obj\Release\Matris.csprojAssemblyReference.cache
+C:\Users\casper\source\repos\tetris\Matris\obj\Release\Matris.csproj.CoreCompileInputs.cache
+C:\Users\casper\source\repos\tetris\Matris\obj\Release\Matris.dll
+C:\Users\casper\source\repos\tetris\Matris\obj\Release\Matris.pdb
+C:\Users\samed\source\repos\tetris 31.12.2018\Matris\bin\Release\Matris.dll
+C:\Users\samed\source\repos\tetris 31.12.2018\Matris\bin\Release\Matris.pdb
+C:\Users\samed\source\repos\tetris 31.12.2018\Matris\obj\Release\Matris.csprojAssemblyReference.cache
+C:\Users\samed\source\repos\tetris 31.12.2018\Matris\obj\Release\Matris.csproj.CoreCompileInputs.cache
+C:\Users\samed\source\repos\tetris 31.12.2018\Matris\obj\Release\Matris.dll
+C:\Users\samed\source\repos\tetris 31.12.2018\Matris\obj\Release\Matris.pdb

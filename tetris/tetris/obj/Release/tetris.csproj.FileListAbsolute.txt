@@ -1,0 +1,36 @@
+C:\Users\casper\source\repos\tetris\tetris\bin\Release\tetris.exe.config
+C:\Users\casper\source\repos\tetris\tetris\bin\Release\tetris.exe
+C:\Users\casper\source\repos\tetris\tetris\bin\Release\tetris.pdb
+C:\Users\casper\source\repos\tetris\tetris\obj\Release\tetris.Tetris.resources
+C:\Users\casper\source\repos\tetris\tetris\obj\Release\tetris.Properties.Resources.resources
+C:\Users\casper\source\repos\tetris\tetris\obj\Release\tetris.csproj.GenerateResource.cache
+C:\Users\casper\source\repos\tetris\tetris\obj\Release\tetris.csproj.CoreCompileInputs.cache
+C:\Users\casper\source\repos\tetris\tetris\obj\Release\tetris.exe
+C:\Users\casper\source\repos\tetris\tetris\obj\Release\tetris.pdb
+C:\Users\casper\source\repos\tetris\tetris\obj\Release\tetris.csprojAssemblyReference.cache
+C:\Users\samed\source\repos\tetris\tetris\bin\Release\tetris.exe.config
+C:\Users\samed\source\repos\tetris\tetris\bin\Release\tetris.exe
+C:\Users\samed\source\repos\tetris\tetris\bin\Release\tetris.pdb
+C:\Users\samed\source\repos\tetris\tetris\bin\Release\Matris.dll
+C:\Users\samed\source\repos\tetris\tetris\bin\Release\Matris.pdb
+C:\Users\samed\source\repos\tetris\tetris\obj\Release\tetris.csprojAssemblyReference.cache
+C:\Users\samed\source\repos\tetris\tetris\obj\Release\tetris.Tetris.resources
+C:\Users\samed\source\repos\tetris\tetris\obj\Release\tetris.Properties.Resources.resources
+C:\Users\samed\source\repos\tetris\tetris\obj\Release\tetris.csproj.GenerateResource.cache
+C:\Users\samed\source\repos\tetris\tetris\obj\Release\tetris.csproj.CoreCompileInputs.cache
+C:\Users\samed\source\repos\tetris\tetris\obj\Release\tetris.csproj.CopyComplete
+C:\Users\samed\source\repos\tetris\tetris\obj\Release\tetris.exe
+C:\Users\samed\source\repos\tetris\tetris\obj\Release\tetris.pdb
+C:\Users\samed\source\repos\tetris 31.12.2018\tetris\bin\Release\tetris.exe.config
+C:\Users\samed\source\repos\tetris 31.12.2018\tetris\bin\Release\tetris.exe
+C:\Users\samed\source\repos\tetris 31.12.2018\tetris\bin\Release\tetris.pdb
+C:\Users\samed\source\repos\tetris 31.12.2018\tetris\bin\Release\Matris.dll
+C:\Users\samed\source\repos\tetris 31.12.2018\tetris\bin\Release\Matris.pdb
+C:\Users\samed\source\repos\tetris 31.12.2018\tetris\obj\Release\tetris.csprojAssemblyReference.cache
+C:\Users\samed\source\repos\tetris 31.12.2018\tetris\obj\Release\tetris.Tetris.resources
+C:\Users\samed\source\repos\tetris 31.12.2018\tetris\obj\Release\tetris.Properties.Resources.resources
+C:\Users\samed\source\repos\tetris 31.12.2018\tetris\obj\Release\tetris.csproj.GenerateResource.cache
+C:\Users\samed\source\repos\tetris 31.12.2018\tetris\obj\Release\tetris.csproj.CoreCompileInputs.cache
+C:\Users\samed\source\repos\tetris 31.12.2018\tetris\obj\Release\tetris.csproj.CopyComplete
+C:\Users\samed\source\repos\tetris 31.12.2018\tetris\obj\Release\tetris.exe
+C:\Users\samed\source\repos\tetris 31.12.2018\tetris\obj\Release\tetris.pdb
