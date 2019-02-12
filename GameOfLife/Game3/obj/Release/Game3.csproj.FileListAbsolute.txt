@@ -1,0 +1,9 @@
+C:\Users\casper\source\repos\Game3\Game3\bin\Release\Game3.exe.config
+C:\Users\casper\source\repos\Game3\Game3\bin\Release\Game3.exe
+C:\Users\casper\source\repos\Game3\Game3\bin\Release\Game3.pdb
+C:\Users\casper\source\repos\Game3\Game3\obj\Release\Game3.AnaSayfa.resources
+C:\Users\casper\source\repos\Game3\Game3\obj\Release\Game3.Properties.Resources.resources
+C:\Users\casper\source\repos\Game3\Game3\obj\Release\Game3.csproj.GenerateResource.cache
+C:\Users\casper\source\repos\Game3\Game3\obj\Release\Game3.csproj.CoreCompileInputs.cache
+C:\Users\casper\source\repos\Game3\Game3\obj\Release\Game3.exe
+C:\Users\casper\source\repos\Game3\Game3\obj\Release\Game3.pdb
