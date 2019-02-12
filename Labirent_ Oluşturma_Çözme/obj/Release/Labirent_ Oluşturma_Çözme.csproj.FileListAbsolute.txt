@@ -1,0 +1,11 @@
+C:\Users\casper\source\repos\Labirent_ Oluşturma_Çözme\Labirent_ Oluşturma_Çözme\bin\Release\Labirent_ Oluşturma_Çözme.exe.config
+C:\Users\casper\source\repos\Labirent_ Oluşturma_Çözme\Labirent_ Oluşturma_Çözme\bin\Release\Labirent_ Oluşturma_Çözme.exe
+C:\Users\casper\source\repos\Labirent_ Oluşturma_Çözme\Labirent_ Oluşturma_Çözme\bin\Release\Labirent_ Oluşturma_Çözme.pdb
+C:\Users\casper\source\repos\Labirent_ Oluşturma_Çözme\Labirent_ Oluşturma_Çözme\obj\Release\Labirent__Oluşturma_Çözme.form1.resources
+C:\Users\casper\source\repos\Labirent_ Oluşturma_Çözme\Labirent_ Oluşturma_Çözme\obj\Release\Labirent__Oluşturma_Çözme.Properties.Resources.resources
+C:\Users\casper\source\repos\Labirent_ Oluşturma_Çözme\Labirent_ Oluşturma_Çözme\obj\Release\Labirent__Oluşturma_Çözme.UserControl1.resources
+C:\Users\casper\source\repos\Labirent_ Oluşturma_Çözme\Labirent_ Oluşturma_Çözme\obj\Release\Labirent_ Oluşturma_Çözme.csproj.GenerateResource.cache
+C:\Users\casper\source\repos\Labirent_ Oluşturma_Çözme\Labirent_ Oluşturma_Çözme\obj\Release\Labirent_ Oluşturma_Çözme.csproj.CoreCompileInputs.cache
+C:\Users\casper\source\repos\Labirent_ Oluşturma_Çözme\Labirent_ Oluşturma_Çözme\obj\Release\Labirent_ Oluşturma_Çözme.exe
+C:\Users\casper\source\repos\Labirent_ Oluşturma_Çözme\Labirent_ Oluşturma_Çözme\obj\Release\Labirent_ Oluşturma_Çözme.pdb
+C:\Users\casper\source\repos\Labirent_ Oluşturma_Çözme\Labirent_ Oluşturma_Çözme\obj\Release\Labirent_ Oluşturma_Çözme.csprojAssemblyReference.cache
