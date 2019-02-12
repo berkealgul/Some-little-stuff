@@ -1,0 +1,14 @@
+C:\Users\berke arda\source\repos\new game\new game\bin\Debug\new game.exe.config
+C:\Users\berke arda\source\repos\new game\new game\bin\Debug\new game.exe
+C:\Users\berke arda\source\repos\new game\new game\bin\Debug\new game.pdb
+C:\Users\berke arda\source\repos\new game\new game\obj\Debug\new game.csprojAssemblyReference.cache
+C:\Users\berke arda\source\repos\new game\new game\obj\Debug\new game.csproj.CoreCompileInputs.cache
+C:\Users\berke arda\source\repos\new game\new game\obj\Debug\new game.exe
+C:\Users\berke arda\source\repos\new game\new game\obj\Debug\new game.pdb
+C:\Users\casper\Downloads\new game\new game\bin\Debug\new game.exe.config
+C:\Users\casper\Downloads\new game\new game\bin\Debug\new game.exe
+C:\Users\casper\Downloads\new game\new game\bin\Debug\new game.pdb
+C:\Users\casper\Downloads\new game\new game\obj\Debug\new game.csprojAssemblyReference.cache
+C:\Users\casper\Downloads\new game\new game\obj\Debug\new game.csproj.CoreCompileInputs.cache
+C:\Users\casper\Downloads\new game\new game\obj\Debug\new game.exe
+C:\Users\casper\Downloads\new game\new game\obj\Debug\new game.pdb

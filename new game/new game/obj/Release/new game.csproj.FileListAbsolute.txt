@@ -1,0 +1,6 @@
+C:\Users\casper\Downloads\new game\new game\bin\Release\new game.exe.config
+C:\Users\casper\Downloads\new game\new game\bin\Release\new game.exe
+C:\Users\casper\Downloads\new game\new game\bin\Release\new game.pdb
+C:\Users\casper\Downloads\new game\new game\obj\Release\new game.csproj.CoreCompileInputs.cache
+C:\Users\casper\Downloads\new game\new game\obj\Release\new game.exe
+C:\Users\casper\Downloads\new game\new game\obj\Release\new game.pdb
