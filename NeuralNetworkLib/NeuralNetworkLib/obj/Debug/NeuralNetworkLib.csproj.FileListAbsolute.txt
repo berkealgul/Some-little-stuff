@@ -1,0 +1,6 @@
+C:\Users\casper\source\repos\NeuralNetworkLib\NeuralNetworkLib\bin\Debug\NeuralNetworkLib.dll
+C:\Users\casper\source\repos\NeuralNetworkLib\NeuralNetworkLib\bin\Debug\NeuralNetworkLib.pdb
+C:\Users\casper\source\repos\NeuralNetworkLib\NeuralNetworkLib\obj\Debug\NeuralNetworkLib.csproj.CoreCompileInputs.cache
+C:\Users\casper\source\repos\NeuralNetworkLib\NeuralNetworkLib\obj\Debug\NeuralNetworkLib.dll
+C:\Users\casper\source\repos\NeuralNetworkLib\NeuralNetworkLib\obj\Debug\NeuralNetworkLib.pdb
+C:\Users\casper\source\repos\NeuralNetworkLib\NeuralNetworkLib\obj\Debug\NeuralNetworkLib.csprojAssemblyReference.cache
