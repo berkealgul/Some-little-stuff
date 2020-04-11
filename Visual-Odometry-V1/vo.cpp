@@ -3,7 +3,7 @@
 void processFrame(Mat *frame, Mat *prevImg, Mat *R, Mat*T, std::vector<Point2f> &prevFeatures)
 {
 	Mat currImg;
-	//alınan resmi siyah-beyaz formata dönüştür
+	//alÃ½nan resmi siyah-beyaz formata dÃ¶nÃ¼Ã¾tÃ¼r
 	cvtColor(*frame, currImg, COLOR_BGR2GRAY);
 
 	std::vector<Point2f> currFeatures;
@@ -16,12 +16,18 @@ void processFrame(Mat *frame, Mat *prevImg, Mat *R, Mat*T, std::vector<Point2f> 
 	Mat E = findEssentialMat(currFeatures, prevFeatures, focal, pp, RANSAC, 0.999, 1.0, mask);
 	recoverPose(E, currFeatures, prevFeatures, *R, *T, focal, pp, mask);
 
-	//zaman geçtikçe özellik sayısı düşecektir
-	//eğer özellik sayısı belli bir sınrın altına düşer ise tekrardan arama yapacağız
+	//zaman geÃ§tikÃ§e Ã¶zellik sayÃ½sÃ½ dÃ¼Ã¾ecektir
+	//eÃ°er Ã¶zellik sayÃ½sÃ½ belli bir sÃ½nrÃ½n altÃ½na dÃ¼Ã¾er ise tekrardan arama yapacaÃ°Ã½z
 	if (prevFeatures.size() < MIN_FEAS)
 	{
 		detectFeatures(prevImg, prevFeatures);
 		tractFeatures(prevImg, prevFeatures, &currImg, currFeatures, status);
+	}
+	
+	// Noktalari Ã§iz
+	for (auto& p : currFeatures)
+	{
+		circle(*frame, p, 2, Scalar(0, 0, 255), 1, 8);
 	}
 	
 	*prevImg = currImg.clone();
@@ -33,7 +39,7 @@ void detectFeatures(Mat *inputImg, std::vector<Point2f> &points)
 	std::vector<KeyPoint> keyPoints;
 	FAST(*inputImg, keyPoints, 10, true);
 
-	//ileriki aşama için "keypoint" türü "point2f" türüne dönüştürülmeli,
+	//ileriki aÃ¾ama iÃ§in "keypoint" tÃ¼rÃ¼ "point2f" tÃ¼rÃ¼ne dÃ¶nÃ¼Ã¾tÃ¼rÃ¼lmeli,
 	KeyPoint::convert(keyPoints, points, std::vector<int>());
 }
 
@@ -42,8 +48,8 @@ void tractFeatures(Mat *prevImg, std::vector<Point2f> &prevPts, Mat *currImg, st
 	std::vector<float> err;
 	calcOpticalFlowPyrLK(*prevImg, *currImg, prevPts, currPts, status, err, Size(21, 21), 3, termCrit, 0, 0.001);
 
-	//hatalı eşleşmelerden kurtulur lakin
-	//bu kısım bana gizemli geldi o yüzden ayrıntılar ile ilgili bir şey diyemeyeceğim
+	//hatalÃ½ eÃ¾leÃ¾melerden kurtulur lakin
+	//bu kÃ½sÃ½m bana gizemli geldi o yÃ¼zden ayrÃ½ntÃ½lar ile ilgili bir Ã¾ey diyemeyeceÃ°im
 	int indexCorrection = 0;
 	for (int i = 0; i < status.size(); i++)
 	{
