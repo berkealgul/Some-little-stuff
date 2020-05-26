@@ -64,7 +64,6 @@ def record():
 	while 1:
 		img = cap_screen(bbox)
 		print(img.shape)
-		cv2.imshow("frame", img)
 		out.write(img)
 		if cv2.waitKey(10) == 27:
 			break
