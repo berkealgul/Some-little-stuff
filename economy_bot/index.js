@@ -1,5 +1,5 @@
 // imports
-const { Client, Intents, Message, MessageContextMenuInteraction } = require('discord.js');
+const { Client, Intents, Message, MessageContextMenuInteraction, MessageEmbed } = require('discord.js');
 const fs = require('fs');
 
 
@@ -7,7 +7,7 @@ class Trader {
 	constructor(id, cash, coin) {
 		this.id = id;
 		this.cash = cash;
-		this.coin = coin
+		this.coin = coin;
 		
 		// sub tree nodes
 		this.left = null;
@@ -15,7 +15,29 @@ class Trader {
 	}
 
 	portfolio() {
-		return "wallet: " + this.cash + " | coin: " + this.coin;
+		const portfolioEmbed = {
+			color: 0x0099ff,
+			author: {
+				name: 'Crypto Bot',
+			},
+	
+			description: "Portfolio of" + parseMention(this.id),
+			
+			fields: [
+				{
+					name: 'Wallet',
+					value: this.cash.toString() + "$",
+					inline: true
+				},
+				{
+					name: 'Coin',
+					value: this.coin.toString(),
+					inline: true
+				},
+			],
+		};
+	
+		return portfolioEmbed;
 	}
 };
 
@@ -34,7 +56,7 @@ function getTraderById(id) {
 	return null;
 }
 
-function addTraderToTree(node, id, cash=100, coin=0) {
+function addTraderToTree(node, id, cash=traderStartingCash, coin=0) {
 	if(node == null)
 		return new Trader(id, cash, coin);
 	else if(node.id > id) {
@@ -50,17 +72,23 @@ function addTrader(msg) {
 	// if trader not exisits we add new one
 	if(getTraderById(msg.author.id) == null) {
 		addTraderToTree(msg.author.id); 
-		msg.reply("Welcome " + msg.author + " and happy trading!");
+		msg.channel.send("Welcome " + parseMention(msg.author.id) + " and happy trading!");
 		root = addTraderToTree(root, msg.author.id);
 	} else { // otherwise we send message about unsuccesful operation
 		msg.reply("Seems you are already trading!");
 	}
 }
 
-function showTraderPortfolio(msg) {
+function showTraderPortfolio(msg, dm) {
 	var trader = getTraderById(msg.author.id);
-	if(trader != null)
-		msg.reply("You currently have: " + trader.portfolio());
+	if(trader != null) {
+		if(dm != undefined) {
+			msg.author.send({ embeds: [trader.portfolio()] });
+		}
+		else {
+			msg.channel.send({ embeds: [trader.portfolio()] });
+		}
+	}	
 }
 
 // for debugging
@@ -83,7 +111,6 @@ function buyCoin(msg, args) {
 			volume = volume + amount;
 			trader.coin = Number(trader.coin) + Number(amount);
 			trader.cash = Number(trader.cash) - Number(cost);
-			price = crpytoPrice();
 			msg.reply("Nice! You just bought" + amount + "coin");
 
 		} else {
@@ -105,20 +132,66 @@ function sellCoin(msg, args) {
 			trader.coin = Number(trader.coin) - Number(amount);
 			trader.cash = Number(trader.cash) + Number(income);
 			msg.reply("Nice! You just" + amount + "coin");
-			price = crpytoPrice();
 		} else {
 			msg.reply("You dont have enough coin");
 		}
 	}
 }
 
-function crpytoPrice() {
-	return (totalVolume-volume) / totalVolume + 0.001;
+function showCoinPrice(msg) {
+	const coinEmbed = {
+		color: 0x0099ff,
+		author: {
+			name: 'Crypto Bot',
+		},
+
+		description: 'Price change in: '  + getTimeToPriceChange() + " min" +"\n------------------------------",
+		
+		fields: [
+			{
+				name: 'Price',
+				value: getPriceIndicationString()
+			},
+			{
+				name: 'Volume',
+				value: volume.toString()
+			}
+		]
+	};
+	
+	msg.channel.send({ embeds: [coinEmbed] });
 }
 
-function showCrpytoPrice(msg) {
-	msg.channel.send("Current coin price : " + price);
+function getPriceIndicationString() {
+	var dt = 100*(price - oldPrice) / oldPrice;
+	var plus = '';
+
+	if (dt > 0) { 
+		plus = '+';
+	}
+
+	return price + "$ (" + plus + 100*(price - oldPrice) / oldPrice + "%)";
 }
+
+function getTimeToPriceChange() {
+	var seconds = (Date.now()-lastPriceChange) / 1000;
+	return priceRefleshRate - Math.floor(seconds / 60);
+}
+
+function calculateCoinPrice() {
+	return volume * pricePerVolume + minPrice;
+}
+
+function updateCoinPrice() {
+	if(getTimeToPriceChange() > 0) {
+		return;
+	}
+
+	lastPriceChange = new Date(); // change time
+	oldPrice = price;
+	price = calculateCoinPrice();
+}
+
 
 function showTraderBalance(msg) {
 	var trader = getMentionedTrader(msg);
@@ -128,7 +201,6 @@ function showTraderBalance(msg) {
 	} else {
 		msg.channel.send(parseMention(trader.id)+" balance: " + trader.portfolio());
 	}
-
 }
 
 // returns FIRST mentioned trader in msg null if trader is not joined or there is no mentioned user
@@ -156,6 +228,8 @@ function saveTradersToJson() {
 
 	var jsonData = {
 		date : getDateNowAsUTC(),
+		ppv : pricePerVolume,
+		mp : minPrice,
 		traderCount : 0,
 		traders : [],
 	};
@@ -164,13 +238,13 @@ function saveTradersToJson() {
 		var trader = stack.pop();
 
 		// todo: create json object from trader and add to the list
-		var traderData = {
+		var botData = {
 			"id" : trader.id,
 			"cash" : trader.cash,
 			"coin" : trader.coin 
 		};
 
-		jsonData.traders.push(traderData);
+		jsonData.traders.push(botData);
 
 		if(trader.left != null) { stack.push(trader.left); }
 		if(trader.right != null) { stack.push(trader.right); }
@@ -178,26 +252,29 @@ function saveTradersToJson() {
 		jsonData.traderCount++;
 	}
 
-	fs.writeFile('./traders.json', JSON.stringify(jsonData, null, 4), function(err) {
+	fs.writeFile('./bot-params.json', JSON.stringify(jsonData, null, 4), function(err) {
 		if(err) {
 			console.log(err);
 		} else {
-			console.log("JSON saved to /traders.json");
+			console.log("JSON saved to /bot-params.json");
 		}
 	}); 
 }
 
-function loadTradersFromJson() {
-	var rawdata = fs.readFileSync('./traders.json');
-	var traderData = JSON.parse(rawdata);
+function loadFromJson() {
+	var rawdata = fs.readFileSync('./bot-params.json');
+	var botData = JSON.parse(rawdata);
 
-	for(var i = 0; i < traderData.traderCount; i++) {
-		var trader = traderData["traders"][i];
+	for(var i = 0; i < botData.traderCount; i++) {
+		var trader = botData["traders"][i];
 		root = addTraderToTree(root, trader["id"], trader["cash"], trader["coin"]);
 		volume += Number(trader["coin"]); // increase the colume
 	}
 
-	console.log("Traders Loaded");
+	minPrice = botData["mp"];
+	pricePerVolume = botData["ppv"];
+
+	console.log("Params Loaded");
 }
 
 // command give [amount] [coin/cash] [user]
@@ -212,7 +289,6 @@ function giveTraderAsset(msg, args) {
 	if(args[2] == 'coin') {
 		var amount = Math.min(args[1], totalVolume-volume);
 		volume += amount;
-		price = crpytoPrice();
 		trader.coin += amount;
 		msg.channel.send("You gave " + amount + " coin to " + parseMention(trader.id) + ". Current balance: " + trader.portfolio());
 	} else if(args[2] == 'cash') {
@@ -221,7 +297,7 @@ function giveTraderAsset(msg, args) {
 	}
 }
 
-// command give  [amount] [coin/cash] [user]
+// command give [amount] [coin/cash] [user]
 function takeTraderAsset(msg, args) {
 	var trader = getMentionedTrader(msg);
 
@@ -231,20 +307,169 @@ function takeTraderAsset(msg, args) {
 	}
 
 	if(args[2] == 'coin') {
-		var amount = Math.max(args[1], 0);
+		var amount = Number(args[1]);
+		if(trader.coin-amount < 0) {
+			amount = trader.coin;
+		}
 		volume -= amount;
-		price = crpytoPrice();
 		trader.coin -= amount;
 		msg.channel.send("You took " + amount + " coin from " + parseMention(trader.id) + ". Current balance: " + trader.portfolio());
+
 	} else if(args[2] == 'cash') {
-		var amount = Math.max(args[1], 0);
+		var amount = Number(args[1]);
+		if(trader.cash-amount < 0) {
+			amount = trader.cash;
+		}
 		trader.cash -= amount;
 		msg.channel.send("You took " + amount + " cash from " + parseMention(trader.id) + ". Current balance: " + trader.portfolio());
 	}
 }
 
+function save(msg) {
+	saveTradersToJson();
+	msg.reply({ // attach json to msg so that it can be downloaded
+		files: [{
+			attachment: './bot-params.json',
+			name: 'bot-params.json'
+		}],
+		content: "Traders are saved successfully",
+	});
+}
+
 function parseMention(id) {
 	return "<@"+id+">";
+}
+
+// format change [parameter to change] [new value]
+function changeCoinPrice(msg, args) {
+	if(args[2] == undefined) {
+		msg.reply("Value not specified");
+		return;
+	}
+
+	if(args[1] === "ppv") {
+		pricePerVolume = Number(args[2]);
+	} else if(args[1] === "mp") {
+		minPrice = Number(args[2]);
+	} else {
+		return;
+	}
+
+	// send embed on success
+	const infoEmbed = {
+		color: 0x0099ff,
+		author: {
+			name: 'Crypto Bot',
+		},
+
+		description:  "Change success! (Prices will be updated with new variables)",
+		
+		fields: [
+			{
+				name: 'Min Price (mp)',
+				value: minPrice.toString(),
+				inline: true
+			},
+			{
+				name: 'Price Per Volume (ppv)',
+				value: pricePerVolume.toString(),
+				inline: true
+			},
+			{
+				name: '------------',
+				value: 'Price change in: '  + getTimeToPriceChange() + " min",
+				inline: false
+			},
+		],
+	};
+
+	msg.channel.send({ embeds: [infoEmbed] });
+}
+
+function showPriceParams(msg) {
+	msg.channel.send("Min Price: " + minPrice + "| Price Per Volume: " + pricePerVolume);
+}
+
+function showAdminHelp(msg) {
+		const helpEmbed = {
+			color: 0x0099ff,
+
+			author: {
+				name: 'Crypto Bot',
+			},
+			
+			description: "Available commands for admins",
+
+			fields: [
+				{
+					name: 'balance [@user]',
+					value: "Displays portfolio of user",
+				},
+				{
+					name: 'give/take [amount] [coin/cash] [@user]',
+					value: 'Gives or takes asset(coin or cash) to user with specified amount',
+				},
+				{
+					name: 'save',
+					value: "Saves current bot parameters.",
+				},
+				{
+					name: 'change [mp/ppv] [value]',
+					value: "Changes price parameters (mp->min price ppv->price per volume). to new value",
+				},
+				{
+					name: 'priceParams',
+					value: "Shows current price params",
+				},
+				{
+					name: 'price',
+					value: "Shows current price information of the coin",
+				},
+				{
+					name: 'help',
+					value: "to send this message again if you forget :)",
+				},
+			],
+		};
+	
+		msg.channel.send({ embeds: [helpEmbed] });
+}
+
+function showTraderHelp(msg) {
+	const helpEmbed = {
+		color: 0x0099ff,
+
+		author: {
+			name: 'Crypto Bot',
+		},
+		
+		description: "Available commands for traders",
+
+		fields: [
+			{
+				name: 'join',
+				value: "Signs you up to trading system.",
+			},
+			{
+				name: 'price',
+				value: "Shows current price information of the coin",
+			},
+			{
+				name: 'portfolio [optional anything]',
+				value: "Shows your current assets if you write anything to second parameter the bot will dm you",
+			},
+			{
+				name: 'buy/sell [amount]',
+				value: "buy or sell specified amount of coin",
+			},
+			{
+				name: 'help',
+				value: "to send this message again if you forget :)",
+			},
+		],
+	};
+
+	msg.channel.send({ embeds: [helpEmbed] });
 }
 
 function processTraderCommands(msg) {
@@ -255,7 +480,7 @@ function processTraderCommands(msg) {
 			addTrader(msg);
 			break;
 		case "portfolio":
-			showTraderPortfolio(msg);
+			showTraderPortfolio(msg, args[1]);
 			break;
 		case "buy":
 			buyCoin(msg, args);
@@ -264,8 +489,13 @@ function processTraderCommands(msg) {
 			sellCoin(msg, args);
 			break;
 		case "price":
-			createChart(msg);
+			showCoinPrice(msg);
 			break;
+		case "help":
+			showTraderHelp(msg);
+			break;
+		default:
+			msg.reply("Unvalid command");
 	}
 }
 
@@ -282,29 +512,35 @@ function processAdminCommands(msg) {
 		case "take":
 			takeTraderAsset(msg, args);
 			break;
-		case "remove":
-			removeTraderAsset(msg, args);
-			break;
 		case "save":
-			saveTradersToJson();
-			msg.reply({
-				files: [{
-					attachment: './traders.json',
-					name: 'traders.json'
-				}],
-				content: "Traders are saved successfully",
-			});
+			save(msg);
 			break;
-		case "debug":
+		case "priceParams":
+			showPriceParams(msg);
+			break;
+		case "price":
+			showCoinPrice(msg);
+			break;
+		case "change":
+			changeCoinPrice(msg, args);
+			break;
+		case "help":
+			showAdminHelp(msg);
+			break;
+		case "debug": // not useful for end user
 			console.log("Traders");
 			printAllTraders(root, 0);
 			break;
+		default:
+			msg.reply("Unvalid command");
 	}	
 }
 
 // event handlers
-function gotMessage(msg) {
+function onMessage(msg) {
 	if(msg.author.id == botId) { return; } // dont process the messages from bot
+
+	updateCoinPrice();
 
 	if(msg.channel.id == traderChannel)
 		processTraderCommands(msg);
@@ -312,11 +548,24 @@ function gotMessage(msg) {
 		processAdminCommands(msg);
 }
 
-
+function onReady() {
+	loadFromJson();
+	console.log('Ready!'); 
+}
 // below is main zone
 
 // get config data from config.json
-const { token, traderChannel, adminChannel, botId } = require('./config.json');
+const { token, traderChannel, adminChannel, botId,
+	 totalVolume, priceRefleshRate, traderStartingCash} = require('./config.json');
+
+// global variables
+var volume = 0; // volume will change with data from json
+var minPrice = 5; // price controlling variables;
+var pricePerVolume = 5; // also they will come from json
+var price = calculateCoinPrice();
+var oldPrice = price;
+var root = null;
+var lastPriceChange = new Date();
 
 // Create a new client instance
 const client = new Client({
@@ -326,18 +575,9 @@ const client = new Client({
 	]
 });
 
-// global variables
-const totalVolume = 1000;
-var volume = 0;
-var price = crpytoPrice();
-var root = null;
-
 // events
-client.on('ready', () => { 
-	loadTradersFromJson();
-	console.log('Ready!'); 
-});
-client.on('messageCreate', gotMessage);
+client.on('ready', onReady);
+client.on('messageCreate', onMessage);
 
 // start the bot
 client.login(token);
