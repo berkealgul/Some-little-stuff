@@ -2,5 +2,8 @@
     "token" : "OTc0NzAxMzg2NzQ5MDcxMzcw.GXsAyN.o98nXVnycyqgPZ6lKrza2VDdTC3vynJVlUabtQ",
     "traderChannel" : 976595527179325461,
     "adminChannel" : 976595550646468738,
-    "botId" : 974701386749071370
+    "botId" : 974701386749071370,
+    "totalVolume" : 10000,
+    "priceRefleshRate" : 60,
+    "traderStartingCash" : 1000
 }
