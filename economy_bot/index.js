@@ -1,8 +1,13 @@
+// imports
+const { Client, Intents, Message, MessageContextMenuInteraction } = require('discord.js');
+const fs = require('fs');
+
+
 class Trader {
-	constructor(id, cash, crypto) {
+	constructor(id, cash, coin) {
 		this.id = id;
 		this.cash = cash;
-		this.crypto = crypto
+		this.coin = coin
 		
 		// sub tree nodes
 		this.left = null;
@@ -10,7 +15,7 @@ class Trader {
 	}
 
 	portfolio() {
-		return "Cash: " + this.cash + " | Crypto: " + this.crypto;
+		return "wallet: " + this.cash + " | coin: " + this.coin;
 	}
 };
 
@@ -29,9 +34,9 @@ function getTraderById(id) {
 	return null;
 }
 
-function addTraderToTree(node, id) {
+function addTraderToTree(node, id, cash=100, coin=0) {
 	if(node == null)
-		return new Trader(id, 100, 0);
+		return new Trader(id, cash, coin);
 	else if(node.id > id) {
 		node.left = addTraderToTree(node.left, id);
 		return node;
@@ -45,17 +50,17 @@ function addTrader(msg) {
 	// if trader not exisits we add new one
 	if(getTraderById(msg.author.id) == null) {
 		addTraderToTree(msg.author.id); 
-		msg.channel.send("Welcome " + msg.author + " and happy trading!");
+		msg.reply("Welcome " + msg.author + " and happy trading!");
 		root = addTraderToTree(root, msg.author.id);
 	} else { // otherwise we send message about unsuccesful operation
-		msg.channel.send("Seems you" + msg.author + " are already trading!");
+		msg.reply("Seems you are already trading!");
 	}
 }
 
 function showTraderPortfolio(msg) {
 	var trader = getTraderById(msg.author.id);
 	if(trader != null)
-		msg.channel.send("You currently have: " + trader.portfolio());
+		msg.reply("You currently have: " + trader.portfolio());
 }
 
 // for debugging
@@ -67,7 +72,7 @@ function printAllTraders(node, num) {
 	}
 }
 
-function buyCrpyto(msg, args) {
+function buyCoin(msg, args) {
 	var trader = getTraderById(msg.author.id);
 
 	if(trader != null) {
@@ -75,91 +80,172 @@ function buyCrpyto(msg, args) {
 		var cost = amount * price;
 
 		if(cost <= trader.cash) {
-			cryptos = cryptos - amount;
+			volume = volume + amount;
+			trader.coin = Number(trader.coin) + Number(amount);
+			trader.cash = Number(trader.cash) - Number(cost);
 			price = crpytoPrice();
-			trader.crypto = trader.crypto + amount;
-			trader.cash = trader.cash - cost;
-			updatePriceData();
-			msg.channel.send("You just bought some coin");
+			msg.reply("Nice! You just bought" + amount + "coin");
 
 		} else {
-			msg.channel.send("You dont have enough cash");
+			msg.reply("You dont have enough cash");
 		}
 	}
 
 }
 
-function sellCrpyto(msg, args) {
+function sellCoin(msg, args) {
 	var trader = getTraderById(msg.author.id);
 
 	if(trader != null) {
 		var amount = args[1];
 		var income = amount * price;
 
-		if(amount <= trader.crypto) {
-			cryptos = cryptos + amount;
+		if(amount <= trader.coin) {
+			volume = volume - amount;
+			trader.coin = Number(trader.coin) - Number(amount);
+			trader.cash = Number(trader.cash) + Number(income);
+			msg.reply("Nice! You just" + amount + "coin");
 			price = crpytoPrice();
-			trader.crypto = trader.crypto - amount;
-			trader.cash = trader.cash + income;
-			updatePriceData();
-			msg.channel.send("You just sold some coin");
 		} else {
-			msg.channel.send("You dont have enough crypto");
+			msg.reply("You dont have enough coin");
 		}
 	}
 }
 
-function updatePriceData() {
-	var dt = Math.floor((Date.now() - lastHourlyTime) / 1000);
-
-	console.log(hourlyPriceData);
-	hourlyPriceData.push(price*10000);
-
-	if(dt >= 3600) {
-		hourlyPriceData.push(price*10000);
-		lastHourlyTime = Date.now();
-	} 
-
-	if(dt >= 3600*24) {
-		dailyPriceData.push(price*10000);
-		lastDailiyTime = Date.now();
-	} 
-}
-
 function crpytoPrice() {
-	return (total_cryptos-cryptos) / total_cryptos + 0.001;
+	return (totalVolume-volume) / totalVolume + 0.001;
 }
 
 function showCrpytoPrice(msg) {
 	msg.channel.send("Current coin price : " + price);
 }
 
-// Require the necessary discord.js classes and token
-const { Client, Intents, Message } = require('discord.js');
-const { token, traderChannel, adminChannel } = require('./config.json');
+function showTraderBalance(msg) {
+	var trader = getMentionedTrader(msg);
+	
+	if(trader == null) {
+		msg.reply("Trader is not found!");
+	} else {
+		msg.channel.send(parseMention(trader.id)+" balance: " + trader.portfolio());
+	}
 
-// Create a new client instance
-const client = new Client({
-	intents: [
-	   Intents.FLAGS.GUILD_MESSAGES,
-	   Intents.FLAGS.GUILDS
-	]
- });
+}
 
-// global variables
-const total_cryptos = 1000;
-var cryptos = 1000;
-var price = crpytoPrice();
-var root = null;
-var dailyPriceData = [price*10000];
-var hourlyPriceData = [price*10000];
-var lastDailiyTime = Date.now();
-var lastHourlyTime = Date.now();
+// returns FIRST mentioned trader in msg null if trader is not joined or there is no mentioned user
+function getMentionedTrader(msg) {
+	var user = msg.mentions.users.first();
 
-// events
-client.on('ready', () => { console.log('Ready!'); });
-client.on('messageCreate', gotMessage);
+	if(user == undefined) { 
+		return null; 
+	} else {
+		return getTraderById(user.id); 
+	}
+}
 
+function getDateNowAsUTC() {
+	return new Date().toUTCString();
+}
+
+function saveTradersToJson() {
+	if(root == null) { 
+		console.log("Couldnt save because there is no trader to save :(");
+		return; 
+	}
+	
+	var stack = [root]; 
+
+	var jsonData = {
+		date : getDateNowAsUTC(),
+		traderCount : 0,
+		traders : [],
+	};
+
+	while(stack.length > 0) {
+		var trader = stack.pop();
+
+		// todo: create json object from trader and add to the list
+		var traderData = {
+			"id" : trader.id,
+			"cash" : trader.cash,
+			"coin" : trader.coin 
+		};
+
+		jsonData.traders.push(traderData);
+
+		if(trader.left != null) { stack.push(trader.left); }
+		if(trader.right != null) { stack.push(trader.right); }
+
+		jsonData.traderCount++;
+	}
+
+	fs.writeFile('./traders.json', JSON.stringify(jsonData, null, 4), function(err) {
+		if(err) {
+			console.log(err);
+		} else {
+			console.log("JSON saved to /traders.json");
+		}
+	}); 
+}
+
+function loadTradersFromJson() {
+	var rawdata = fs.readFileSync('./traders.json');
+	var traderData = JSON.parse(rawdata);
+
+	for(var i = 0; i < traderData.traderCount; i++) {
+		var trader = traderData["traders"][i];
+		root = addTraderToTree(root, trader["id"], trader["cash"], trader["coin"]);
+		volume += Number(trader["coin"]); // increase the colume
+	}
+
+	console.log("Traders Loaded");
+}
+
+// command give [amount] [coin/cash] [user]
+function giveTraderAsset(msg, args) {
+	var trader = getMentionedTrader(msg);
+
+	if(trader == null) {
+		msg.reply("Trader not found");
+		return;
+	}
+
+	if(args[2] == 'coin') {
+		var amount = Math.min(args[1], totalVolume-volume);
+		volume += amount;
+		price = crpytoPrice();
+		trader.coin += amount;
+		msg.channel.send("You gave " + amount + " coin to " + parseMention(trader.id) + ". Current balance: " + trader.portfolio());
+	} else if(args[2] == 'cash') {
+		trader.cash += Number(args[1]);
+		msg.channel.send("You gave " + args[1] + " cash to " + parseMention(trader.id) + ". Current balance: " + trader.portfolio());
+	}
+}
+
+// command give  [amount] [coin/cash] [user]
+function takeTraderAsset(msg, args) {
+	var trader = getMentionedTrader(msg);
+
+	if(trader == null) {
+		msg.reply("Trader not found");
+		return;
+	}
+
+	if(args[2] == 'coin') {
+		var amount = Math.max(args[1], 0);
+		volume -= amount;
+		price = crpytoPrice();
+		trader.coin -= amount;
+		msg.channel.send("You took " + amount + " coin from " + parseMention(trader.id) + ". Current balance: " + trader.portfolio());
+	} else if(args[2] == 'cash') {
+		var amount = Math.max(args[1], 0);
+		trader.cash -= amount;
+		msg.channel.send("You took " + amount + " cash from " + parseMention(trader.id) + ". Current balance: " + trader.portfolio());
+	}
+}
+
+function parseMention(id) {
+	return "<@"+id+">";
+}
 
 function processTraderCommands(msg) {
 	var args = msg.content.split(" ");
@@ -172,13 +258,13 @@ function processTraderCommands(msg) {
 			showTraderPortfolio(msg);
 			break;
 		case "buy":
-			buyCrpyto(msg, args);
+			buyCoin(msg, args);
 			break;
 		case "sell":
-			sellCrpyto(msg, args);
+			sellCoin(msg, args);
 			break;
-		case "coin":
-			showCrpytoPrice(msg);
+		case "price":
+			createChart(msg);
 			break;
 	}
 }
@@ -187,62 +273,71 @@ function processAdminCommands(msg) {
 	var args = msg.content.split(" ");
 
 	switch (args[0]) {
-		case "join":
-			addTrader(msg);
+		case "balance":
+			showTraderBalance(msg);
+			break;
+		case "give":
+			giveTraderAsset(msg, args);
+			break;
+		case "take":
+			takeTraderAsset(msg, args);
+			break;
+		case "remove":
+			removeTraderAsset(msg, args);
+			break;
+		case "save":
+			saveTradersToJson();
+			msg.reply({
+				files: [{
+					attachment: './traders.json',
+					name: 'traders.json'
+				}],
+				content: "Traders are saved successfully",
+			});
 			break;
 		case "debug":
 			console.log("Traders");
 			printAllTraders(root, 0);
 			break;
-		case "buy":
-			buyCrpyto(msg, args);
-			break;
-		case "sell":
-			sellCrpyto(msg, args);
-			break;
-		case "coin":
-			showCrpytoPrice(msg);
-			createChart(msg);
-			break;
 	}	
-}
-
-function createChart(msg) {
-	const ChartJsImage = require('chartjs-to-image');
-
-	const data = {
-		datasets: [{
-		  label: 'Price of the coin',
-		  borderColor: 'rgb(255, 99, 132)',
-		  data: hourlyPriceData,
-		}]
-	  };
-
-	const myChart = new ChartJsImage();
-	myChart.setConfig({
-		type: 'line',
-		data: data,
-	});
-	myChart.toFile('./chart.jpg');
-
-	const chartEmbed = {
-		title: 'Shitcoin',
-		description: 'Price history of the coin',
-		image: {
-		  url: myChart.getUrl(),
-		},
-	};
-
-	msg.channel.send({ embeds: [chartEmbed] });
 }
 
 // event handlers
 function gotMessage(msg) {
+	if(msg.author.id == botId) { return; } // dont process the messages from bot
+
 	if(msg.channel.id == traderChannel)
 		processTraderCommands(msg);
 	else if (msg.channel.id == adminChannel)
 		processAdminCommands(msg);
 }
+
+
+// below is main zone
+
+// get config data from config.json
+const { token, traderChannel, adminChannel, botId } = require('./config.json');
+
+// Create a new client instance
+const client = new Client({
+	intents: [
+	   Intents.FLAGS.GUILD_MESSAGES,
+	   Intents.FLAGS.GUILDS
+	]
+});
+
+// global variables
+const totalVolume = 1000;
+var volume = 0;
+var price = crpytoPrice();
+var root = null;
+
+// events
+client.on('ready', () => { 
+	loadTradersFromJson();
+	console.log('Ready!'); 
+});
+client.on('messageCreate', gotMessage);
 
 // start the bot
 client.login(token);
