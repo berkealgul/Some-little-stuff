@@ -5,9 +5,7 @@
 // Define pin connections & motor's steps per revolution
 const int dirPin = 2;
 const int stepPin = 3;
-const int stepsPerRevolution = 200;
-const int secondsForRevolution = 36;
-const int stepsPerSecond = stepsPerRevolution / secondsForRevolution;
+// delay = 200 / 36 * 1000 = 180
 
 AccelStepper myStepper(motorInterfaceType, stepPin, dirPin);
 
@@ -23,7 +21,7 @@ void setup()
 void loop()
 {
   digitalWrite(stepPin, HIGH);
-  delayMicroseconds(2000);
+  delayMicroseconds(1000);
   digitalWrite(stepPin, LOW);
-  delayMicroseconds(2000);
+  delay(180);
 }
