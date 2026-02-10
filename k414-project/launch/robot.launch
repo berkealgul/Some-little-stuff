@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- Scan Matchcer-->
+    <node name="scan_matcher_node" pkg="k414" type="scan_matcher">
+        <remap from="front_scan" to="/limo/laser_scan"/>
+        <remap from="rear_scan"  to="/limo/laser_rear_scan"/>
+
+        <!--Output Scan-->
+        <remap from="scan"  to="scan"/>
+
+        <param name="active"            value="true"/>
+        <param name="publish_scan"      value="true"/>
+        <param name="publish_pcl"       value="false"/>
+
+        <param name="ranges_num"        value="1000"/>
+
+        <param name="min_scanner_range" value="0.05"/>
+        <param name="max_scanner_range" value="100.0"/>
+
+        <param name="min_x_range"       value="-100.0"/>
+        <param name="max_x_range"       value="100.0"/>
+        <param name="min_y_range"       value="-100.0"/>
+        <param name="max_y_range"       value="100.0"/>
+
+        <param name="fixed_frame_id"   value="odom"/>
+        <param name="target_frame_id"   value="base_footprint"/>
+    </node>
+
+    <!-- Move Base Navigation -->
+    <arg name="frame_prefix" default=""/>
+    <arg name="robot_name" default=""/>
+
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+        <rosparam file="$(find k414)/param/costmap_common_params.yaml" command="load" ns="global_costmap" />
+        <rosparam file="$(find k414)/param/costmap_common_params.yaml" command="load" ns="local_costmap" />
+        <rosparam file="$(find k414)/param/local_costmap_params.yaml" command="load" />
+        <rosparam file="$(find k414)/param/global_costmap_params.yaml" command="load" />
+        <rosparam file="$(find k414)/param/base_local_planner_holonomic_params.yaml" command="load" />
+        <rosparam file="$(find k414)/param/move_base_params.yaml" command="load" />
+
+        <!-- explicitly define frame ids for movebase -->
+        <param name="global_costmap/global_frame"                   value="$(arg frame_prefix)map"/>
+        <param name="global_costmap/robot_base_frame"               value="$(arg frame_prefix)base_footprint"/>
+        <param name="global_costmap/2d_obstacles_layer/scan/topic"  value="$(arg robot_name)scan"/>
+        <param name="global_costmap/3d_obstacles_layer/depth/topic" value="$(arg robot_name)camera/depth/points"/>
+        <param name="local_costmap/global_frame"                    value="$(arg frame_prefix)odom"/>
+        <param name="local_costmap/robot_base_frame"                value="$(arg frame_prefix)base_footprint"/>
+        <param name="local_costmap/2d_obstacles_layer/scan/topic"   value="$(arg robot_name)scan"/>
+        <param name="local_costmap/3d_obstacles_layer/depth/topic"  value="$(arg robot_name)camera/depth/points"/>
+    </node>
+
+    <!-- Map server -->
+    <arg name="map_file" default="$(find k414)/maps/bookstore_map.yaml"/>
+    <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)" >
+        <param name="frame_id" value="$(arg frame_prefix)map" />
+    </node>
+
+    <!-- AMCL used for localization -->
+    <include file="$(find k414)/launch/amcl.launch">
+        <arg name="frame_prefix" value="$(arg frame_prefix)"/>
+    </include>
+
+    <!-- Gazebo Simulation -->
+    <include file="$(find limo_gazebo_sim)/launch/limo_four_diff.launch" />
+    
+    <!-- Mission Manager -->
+    <!-- <node name="mission_planner_node" pkg="k414" type="mission_planner" /> -->
+
+    <!-- load the steering node -->
+    <!-- <node name="rqt_robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering"/> -->
+</launch>
